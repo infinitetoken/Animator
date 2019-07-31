@@ -6,9 +6,10 @@
 //
 
 #if os(iOS) || os(tvOS)
+
 import UIKit
 
-extension Animator {
+public extension Animator {
     
     static func frames(from images: [UIImage], duration: Double = 1.0) -> [Frame] {
         return images.map({ (image) -> CGImage? in
@@ -19,4 +20,16 @@ extension Animator {
     }
     
 }
+
+public extension Animator.Frame {
+    
+    init?(image: UIImage, duration: Double) {
+        guard let cgImage = image.cgImage else { return nil }
+        
+        self.image = cgImage
+        self.duration = duration
+    }
+    
+}
+
 #endif

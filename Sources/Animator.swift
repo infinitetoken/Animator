@@ -11,20 +11,38 @@ import CoreGraphics
 import CoreVideo
 import AVFoundation
 
+#if os(iOS) || os(tvOS)
+import MobileCoreServices
+#endif
+
 public struct Animator {
     
-    struct Frame {
+    public enum AnimatorError: LocalizedError {
+        case failed
+        case error(Error)
+        
+        public var errorDescription: String? {
+            switch self {
+            case .failed:
+                return "Failed"
+            case .error(let error):
+                return error.localizedDescription
+            }
+        }
+    }
+    
+    public struct Frame {
         var image: CGImage
         var duration: Double
     }
     
-    static func movie(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func movie(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         var assetWriter: AVAssetWriter
         
         do {
             assetWriter = try AVAssetWriter(outputURL: outputURL, fileType: AVFileType.mov)
         } catch {
-            completion(error)
+            completion(AnimatorError.error(error))
             return
         }
         
@@ -57,7 +75,7 @@ public struct Animator {
             assetWriterInput.markAsFinished()
             assetWriter.finishWriting {
                 if let error = assetWriter.error {
-                    DispatchQueue.main.async { completion(error) }
+                    DispatchQueue.main.async { completion(AnimatorError.error(error)) }
                 } else {
                     DispatchQueue.main.async { completion(nil) }
                 }
@@ -65,15 +83,43 @@ public struct Animator {
         }
     }
     
-    static func animation(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
-        completion(nil)
+    public static func animation(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+        queue.async {
+            let fileProperties = [kCGImagePropertyGIFDictionary as String:[
+                kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],
+                kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
+            ] as [String : Any]
+            
+            guard let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, kUTTypeGIF, frames.count, nil) else {
+                completion(AnimatorError.failed)
+                return
+            }
+            
+            CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
+            
+            for frame in frames {
+                let frameProperties = [
+                    kCGImagePropertyGIFDictionary as String:[
+                        kCGImagePropertyGIFDelayTime as String: frame.duration
+                    ]
+                ]
+                
+                CGImageDestinationAddImage(destination, frame.image, frameProperties as CFDictionary)
+            }
+            
+            if CGImageDestinationFinalize(destination) {
+                completion(nil)
+            } else {
+                completion(AnimatorError.failed)
+            }
+        }
     }
     
 }
     
-extension Animator {
+public extension Animator {
     
-    static func frames(from images: [CGImage], duration: Double = 1.0) -> [Frame] {
+    static func frames(from images: [CGImage], duration: Double = 3.0) -> [Frame] {
         return images.map { (image) -> Frame in
             return Frame(image: image, duration: duration)
         }
@@ -81,20 +127,19 @@ extension Animator {
     
 }
 
-extension Animator {
+private extension Animator {
     
-    private static func pixelBuffer(fromImage image: CGImage, size: CGSize, attributes: [String : Any]) -> CVPixelBuffer? {
-        var pxbuffer: CVPixelBuffer? = nil
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, attributes as CFDictionary, &pxbuffer)
-        guard let buffer = pxbuffer, status == kCVReturnSuccess else { return nil }
+   static func pixelBuffer(fromImage image: CGImage, size: CGSize, attributes: [String : Any]) -> CVPixelBuffer? {
+        var pixelBuffer: CVPixelBuffer? = nil
+        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, attributes as CFDictionary, &pixelBuffer)
+        guard let buffer = pixelBuffer, status == kCVReturnSuccess else { return nil }
         
         CVPixelBufferLockBaseAddress(buffer, [])
-        guard let pxdata = CVPixelBufferGetBaseAddress(buffer) else { return nil }
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+        guard let data = CVPixelBufferGetBaseAddress(buffer) else { return nil }
         
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
         
-        guard let context = CGContext(data: pxdata, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) else { return nil }
+        guard let context = CGContext(data: data, width: Int(size.width), height: Int(size.height), bitsPerComponent: image.bitsPerComponent, bytesPerRow: image.bytesPerRow, space: rgbColorSpace, bitmapInfo: image.bitmapInfo.rawValue) else { return nil }
         context.concatenate(CGAffineTransform(rotationAngle: 0))
         context.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
         

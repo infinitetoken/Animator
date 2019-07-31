@@ -50,13 +50,14 @@ final class AnimatorTests: XCTestCase {
         let fileManager = FileManager.default
         let url = fileManager.temporaryDirectory.appendingPathComponent("\(uuid.uuidString).mov")
         
+        Swift.print(url)
+        
         let expectation = XCTestExpectation(description: "Create Movie")
         
         Animator.movie(from: Animator.frames(from: self.images), size: CGSize(width: 100, height: 100), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }
-            Swift.print(url.path)
             XCTAssertTrue(fileManager.fileExists(atPath: url.path))
             expectation.fulfill()
         }
@@ -69,13 +70,14 @@ final class AnimatorTests: XCTestCase {
         let fileManager = FileManager.default
         let url = fileManager.temporaryDirectory.appendingPathComponent("\(uuid.uuidString).gif")
         
+        Swift.print(url)
+        
         let expectation = XCTestExpectation(description: "Create Animation")
         
         Animator.animation(from: Animator.frames(from: self.images), size: CGSize(width: 100, height: 100), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }
-            Swift.print(url.path)
             XCTAssertTrue(fileManager.fileExists(atPath: url.path))
             expectation.fulfill()
         }

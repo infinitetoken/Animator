@@ -6,9 +6,10 @@
 //
 
 #if os(macOS)
+
 import Cocoa
 
-extension Animator {
+public extension Animator {
     
     static func frames(from images: [NSImage], duration: Double = 1.0) -> [Frame] {
         return images.map({ (image) -> CGImage? in
@@ -21,4 +22,20 @@ extension Animator {
     }
     
 }
+
+public extension Animator.Frame {
+    
+    init?(image: NSImage, duration: Double) {
+        var imageRect = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
+        
+        guard let cgImage = image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil) else {
+            return nil
+        }
+        
+        self.image = cgImage
+        self.duration = duration
+    }
+    
+}
+
 #endif
