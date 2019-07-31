@@ -91,7 +91,7 @@ public struct Animator {
             ] as [String : Any]
             
             guard let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, kUTTypeGIF, frames.count, nil) else {
-                completion(AnimatorError.failed)
+                DispatchQueue.main.async { completion(AnimatorError.failed) }
                 return
             }
             
@@ -108,9 +108,9 @@ public struct Animator {
             }
             
             if CGImageDestinationFinalize(destination) {
-                completion(nil)
+                DispatchQueue.main.async { completion(nil) }
             } else {
-                completion(AnimatorError.failed)
+                DispatchQueue.main.async { completion(AnimatorError.failed) }
             }
         }
     }
