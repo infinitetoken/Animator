@@ -136,10 +136,12 @@ private extension Animator {
         
         CVPixelBufferLockBaseAddress(buffer, [])
         guard let data = CVPixelBufferGetBaseAddress(buffer) else { return nil }
-        
+    
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+    
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        
-        guard let context = CGContext(data: data, width: Int(size.width), height: Int(size.height), bitsPerComponent: image.bitsPerComponent, bytesPerRow: image.bytesPerRow, space: rgbColorSpace, bitmapInfo: image.bitmapInfo.rawValue) else { return nil }
+    
+        guard let context = CGContext(data: data, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) else { return nil }
         context.concatenate(CGAffineTransform(rotationAngle: 0))
         context.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
         
