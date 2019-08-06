@@ -48,7 +48,7 @@ final class AnimatorTests: XCTestCase {
     func testCanCreateMovie() {
         let uuid = UUID()
         let fileManager = FileManager.default
-        let url = fileManager.homeDirectoryForCurrentUser.appendingPathComponent("downloads/\(uuid.uuidString).mov")
+        let url = fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Downloads/\(uuid.uuidString).mov")
         
         Swift.print(url)
         
@@ -68,7 +68,7 @@ final class AnimatorTests: XCTestCase {
     func testCanCreateAnimation() {
         let uuid = UUID()
         let fileManager = FileManager.default
-        let url = fileManager.homeDirectoryForCurrentUser.appendingPathComponent("downloads/\(uuid.uuidString).gif")
+        let url = fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Downloads/\(uuid.uuidString).gif")
         
         Swift.print(url)
         

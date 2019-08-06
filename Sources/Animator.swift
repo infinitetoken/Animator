@@ -130,23 +130,24 @@ public extension Animator {
 private extension Animator {
     
    static func pixelBuffer(fromImage image: CGImage, size: CGSize, attributes: [String : Any]) -> CVPixelBuffer? {
-        var pixelBuffer: CVPixelBuffer? = nil
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, attributes as CFDictionary, &pixelBuffer)
-        guard let buffer = pixelBuffer, status == kCVReturnSuccess else { return nil }
+        var buffer: CVPixelBuffer! = nil
+
+        if CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, attributes as CFDictionary, &buffer) == kCVReturnSuccess {
+            CVPixelBufferLockBaseAddress(buffer, [])
         
-        CVPixelBufferLockBaseAddress(buffer, [])
-        guard let data = CVPixelBufferGetBaseAddress(buffer) else { return nil }
-    
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
-    
-        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-    
-        guard let context = CGContext(data: data, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) else { return nil }
-        context.concatenate(CGAffineTransform(rotationAngle: 0))
-        context.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+            if let data = CVPixelBufferGetBaseAddress(buffer) {
+                let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+                let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+            
+                if let context = CGContext(data: data, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) {
+                    context.concatenate(CGAffineTransform(rotationAngle: 0))
+                    context.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+                }
+            }
         
-        CVPixelBufferUnlockBaseAddress(buffer, [])
-        
+            CVPixelBufferUnlockBaseAddress(buffer, [])
+        }
+    
         return buffer
     }
     
