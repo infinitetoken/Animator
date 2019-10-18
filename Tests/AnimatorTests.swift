@@ -48,7 +48,7 @@ final class AnimatorTests: XCTestCase {
     func testCanCreateMovie() {
         let uuid = UUID()
         let fileManager = FileManager.default
-        let url = fileManager.temporaryDirectory.appendingPathComponent("\(uuid.uuidString).mov")
+        let url = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!.appendingPathComponent("\(uuid.uuidString).mov")
         
         Swift.print(url)
         
@@ -62,13 +62,13 @@ final class AnimatorTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 20.0)
+        wait(for: [expectation], timeout: 5.0)
     }
     
     func testCanCreateAnimation() {
         let uuid = UUID()
         let fileManager = FileManager.default
-        let url = fileManager.temporaryDirectory.appendingPathComponent("\(uuid.uuidString).gif")
+        let url = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!.appendingPathComponent("\(uuid.uuidString).gif")
         
         Swift.print(url)
         
@@ -82,7 +82,7 @@ final class AnimatorTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 20.0)
+        wait(for: [expectation], timeout: 5.0)
     }
     
 }
