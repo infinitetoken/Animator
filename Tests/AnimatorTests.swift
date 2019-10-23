@@ -54,7 +54,7 @@ final class AnimatorTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "Create Movie")
         
-        Animator.movie(from: Animator.frames(from: self.images), size: CGSize(width: 100, height: 100), outputURL: url) { (error) in
+        Animator.movie(from: Animator.frames(from: self.images), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }
@@ -74,7 +74,7 @@ final class AnimatorTests: XCTestCase {
         
         let expectation = XCTestExpectation(description: "Create Animation")
         
-        Animator.animation(from: Animator.frames(from: self.images), size: CGSize(width: 100, height: 100), outputURL: url) { (error) in
+        Animator.animation(from: Animator.frames(from: self.images), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }

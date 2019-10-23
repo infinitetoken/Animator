@@ -36,7 +36,7 @@ public struct Animator {
         var duration: Double
     }
     
-    public static func movie(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func movie(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         var assetWriter: AVAssetWriter
         
         do {
@@ -45,6 +45,14 @@ public struct Animator {
             completion(AnimatorError.error(error))
             return
         }
+        
+        let width = frames.max { (a, b) -> Bool in
+            return a.image.width > b.image.width
+        }?.image.width ?? 0
+        let height = frames.max { (a, b) -> Bool in
+            return a.image.height > b.image.height
+        }?.image.width ?? 0
+        let size = CGSize(width: width, height: height)
         
         let settings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecH264,
@@ -83,7 +91,7 @@ public struct Animator {
         }
     }
     
-    public static func animation(from frames: [Frame], size: CGSize, outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func animation(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         queue.async {
             let fileProperties = [kCGImagePropertyGIFDictionary as String:[
                 kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],

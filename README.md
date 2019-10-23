@@ -14,14 +14,14 @@ import Animator
 let images: [CGImage] = ...
 let url: URL = ...
 
-Animator.movie(from: Animator.frames(from: images), size: CGSize(width: 480, height: 320), outputURL: url) { (error) in
+Animator.movie(from: Animator.frames(from: images), outputURL: url) { (error) in
     if let error = error {
         // Error
     }
     // It worked! Do something with the file at url...
 }
 
-Animator.animation(from: Animator.frames(from: images), size: CGSize(width: 480, height: 320), outputURL: url) { (error) in
+Animator.animation(from: Animator.frames(from: images), outputURL: url) { (error) in
     if let error = error {
         // Error
     }
