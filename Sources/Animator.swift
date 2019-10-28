@@ -34,6 +34,7 @@ public struct Animator {
     public struct Frame {
         var image: CGImage
         var duration: Double
+        var fillColor: CGColor = CGColor.black
     }
     
     public static func movie(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
@@ -47,11 +48,11 @@ public struct Animator {
         }
         
         let width = frames.max { (a, b) -> Bool in
-            return a.image.width > b.image.width
+            return a.image.width < b.image.width
         }?.image.width ?? 0
         let height = frames.max { (a, b) -> Bool in
-            return a.image.height > b.image.height
-        }?.image.width ?? 0
+            return a.image.height < b.image.height
+        }?.image.height ?? 0
         let size = CGSize(width: width, height: height)
         
         let settings: [String: Any] = [
@@ -67,20 +68,23 @@ public struct Animator {
         assetWriter.startWriting()
         assetWriter.startSession(atSourceTime: CMTime.zero)
         
+        var frameIndex: Int = 0
+        var frameTime: Double = 0.0
+        
         assetWriterInput.requestMediaDataWhenReady(on: queue) {
-            var seconds: Double = 0.0
-            
-            for frame in frames {
-                while !assetWriterInput.isReadyForMoreMediaData { usleep(10) }
+            while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
+                let frame = frames[frameIndex]
                 
-                if let buffer = self.pixelBuffer(fromImage: frame.image, size: size, attributes: attributes) {
-                    adaptor.append(buffer, withPresentationTime: CMTime(seconds: seconds, preferredTimescale: 1))
+                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: width, height: height), fillColor: frame.fillColor), let buffer = image.pixelBuffer(size: size) {
+                    adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1))
                     
-                    seconds += frame.duration
+                    frameTime += frame.duration
                 }
+                frameIndex += 1
             }
             
             assetWriterInput.markAsFinished()
+            
             assetWriter.finishWriting {
                 if let error = assetWriter.error {
                     DispatchQueue.main.async { completion(AnimatorError.error(error)) }
@@ -92,6 +96,13 @@ public struct Animator {
     }
     
     public static func animation(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+        let width = frames.max { (a, b) -> Bool in
+            return a.image.width < b.image.width
+        }?.image.width ?? 0
+        let height = frames.max { (a, b) -> Bool in
+            return a.image.height < b.image.height
+        }?.image.height ?? 0
+        
         queue.async {
             let fileProperties = [kCGImagePropertyGIFDictionary as String:[
                 kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],
@@ -112,7 +123,9 @@ public struct Animator {
                     ]
                 ]
                 
-                CGImageDestinationAddImage(destination, frame.image, frameProperties as CFDictionary)
+                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: width, height: height), fillColor: frame.fillColor) {
+                    CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
+                }
             }
             
             if CGImageDestinationFinalize(destination) {
@@ -131,38 +144,6 @@ public extension Animator {
         return images.map { (image) -> Frame in
             return Frame(image: image, duration: duration)
         }
-    }
-    
-}
-
-private extension Animator {
-    
-   static func pixelBuffer(fromImage image: CGImage, size: CGSize, attributes: [String : Any]) -> CVPixelBuffer? {
-        var pixelBuffer: CVPixelBuffer? = nil
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, attributes as CFDictionary, &pixelBuffer)
-        guard let buffer = pixelBuffer, status == kCVReturnSuccess else { return nil }
-        
-        CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
-        guard let data = CVPixelBufferGetBaseAddress(buffer) else { return nil }
-        
-        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        
-        guard let context = CGContext(
-            data: data,
-            width: Int(size.width),
-            height: Int(size.height),
-            bitsPerComponent: 8,
-            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-            space: rgbColorSpace,
-            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
-        ) else { return nil }
-    
-        context.concatenate(CGAffineTransform(rotationAngle: 0))
-        context.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
-        
-        CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
-        
-        return buffer
     }
     
 }
