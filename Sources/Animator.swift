@@ -34,10 +34,11 @@ public struct Animator {
     public struct Frame {
         var image: CGImage
         var duration: Double
-        var fillColor: CGColor = CGColor.black
+        var position: Int = 0
+        var background: CGColor
     }
     
-    public static func movie(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func movie(from frames: [Frame], outputURL: URL, size: CGSize? = nil, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         var assetWriter: AVAssetWriter
         
         do {
@@ -53,7 +54,7 @@ public struct Animator {
         let height = frames.max { (a, b) -> Bool in
             return a.image.height < b.image.height
         }?.image.height ?? 0
-        let size = CGSize(width: width, height: height)
+        let size = size ?? CGSize(width: width, height: height)
         
         let settings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecH264,
@@ -73,9 +74,11 @@ public struct Animator {
         
         assetWriterInput.requestMediaDataWhenReady(on: queue) {
             while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
-                let frame = frames[frameIndex]
+                let frame = frames.sorted(by: { (a, b) -> Bool in
+                    a.position < b.position
+                })[frameIndex]
                 
-                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: width, height: height), fillColor: frame.fillColor), let buffer = image.pixelBuffer(size: size) {
+                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
                     adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1))
                     
                     frameTime += frame.duration
@@ -95,13 +98,14 @@ public struct Animator {
         }
     }
     
-    public static func animation(from frames: [Frame], outputURL: URL, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func animation(from frames: [Frame], outputURL: URL, size: CGSize? = nil, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         let width = frames.max { (a, b) -> Bool in
             return a.image.width < b.image.width
         }?.image.width ?? 0
         let height = frames.max { (a, b) -> Bool in
             return a.image.height < b.image.height
         }?.image.height ?? 0
+        let size = size ?? CGSize(width: width, height: height)
         
         queue.async {
             let fileProperties = [kCGImagePropertyGIFDictionary as String:[
@@ -116,14 +120,16 @@ public struct Animator {
             
             CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
             
-            for frame in frames {
+            for frame in frames.sorted(by: { (a, b) -> Bool in
+                a.position < b.position
+            }) {
                 let frameProperties = [
                     kCGImagePropertyGIFDictionary as String:[
                         kCGImagePropertyGIFDelayTime as String: frame.duration
                     ]
                 ]
                 
-                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: width, height: height), fillColor: frame.fillColor) {
+                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
                     CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
                 }
             }
@@ -133,16 +139,6 @@ public struct Animator {
             } else {
                 DispatchQueue.main.async { completion(AnimatorError.failed) }
             }
-        }
-    }
-    
-}
-    
-public extension Animator {
-    
-    static func frames(from images: [CGImage], duration: Double = 3.0) -> [Frame] {
-        return images.map { (image) -> Frame in
-            return Frame(image: image, duration: duration)
         }
     }
     

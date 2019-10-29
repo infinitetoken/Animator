@@ -1,8 +1,9 @@
 //
-//  File.swift
-//  
+//  CGImage+Centered.swift
+//  Animator
 //
 //  Created by Aaron Wright on 10/28/19.
+//  Copyright © 2019 Infinite Token LLC. All rights reserved.
 //
 
 import Foundation
@@ -11,7 +12,7 @@ import CoreGraphics
 
 extension CGImage {
     
-    func centered(in rect: CGRect, fillColor: CGColor = CGColor.black) -> CGImage? {
+    func centered(in rect: CGRect, background: CGColor) -> CGImage? {
         let width = rect.size.width.integerValue
         let height = rect.size.height.integerValue
 
@@ -30,7 +31,7 @@ extension CGImage {
             bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
         )
 
-        context?.setFillColor(fillColor)
+        context?.setFillColor(background)
         context?.fill(rect)
         context?.draw(self, in: CGRect(x: 0, y: 0, width: self.width, height: self.height).centered(in: rect))
 

@@ -13,24 +13,30 @@ final class AnimatorTests: XCTestCase {
     
     struct TestImage {
         var size: CGSize
-        var ext: String = "png"
+        var ext: String
+        var position: Int
+    }
+    
+    struct TestURL {
+        var url: URL
+        var position: Int
     }
     
     var testImages: [TestImage] {
         return [
-            TestImage(size: CGSize(width: 100, height: 100)),
-            TestImage(size: CGSize(width: 200, height: 100), ext: "jpg"),
-            TestImage(size: CGSize(width: 400, height: 200))
+            TestImage(size: CGSize(width: 100, height: 100), ext: "png", position: 0),
+            TestImage(size: CGSize(width: 200, height: 100), ext: "png", position: 1),
+            TestImage(size: CGSize(width: 400, height: 200), ext: "png", position: 2)
         ]
     }
-    var urls: [URL] = []
+    var urls: [TestURL] = []
     
     // MARK: - Properties
 
     #if os(macOS)
     var images: [CGImage] {
-        self.urls.map { (url) -> Data? in
-            try? Data(contentsOf: url)
+        self.urls.map { (testURL) -> Data? in
+            try? Data(contentsOf: testURL.url)
         }.compactMap({ $0 }).map { (data) -> NSImage? in
             NSImage(data: data)
         }.compactMap({ $0 }).map { (image) -> CGImage? in
@@ -43,8 +49,8 @@ final class AnimatorTests: XCTestCase {
 
     #if os(iOS) || os(tvOS)
     var images: [CGImage] {
-        self.urls.map { (url) -> Data? in
-            try? Data(contentsOf: url)
+        self.urls.map { (testURL) -> Data? in
+            try? Data(contentsOf: testURL.url)
         }.compactMap({ $0 }).map { (data) -> UIImage? in
             UIImage(data: data)
         }.compactMap({ $0 }).map { (image) -> CGImage? in
@@ -121,7 +127,7 @@ final class AnimatorTests: XCTestCase {
                 
                 try? data?.write(to: fileURL)
                 
-                self.urls.append(fileURL)
+                self.urls.append(TestURL(url: fileURL, position: testImage.position))
                 
                 if index == self.testImages.count {
                     expectation.fulfill()
@@ -135,9 +141,9 @@ final class AnimatorTests: XCTestCase {
     private func removeImages() {
         let fileManager = FileManager.default
         
-        for url in self.urls {
-            if fileManager.fileExists(atPath: url.path) {
-                try! fileManager.removeItem(at: url)
+        for testURL in self.urls {
+            if fileManager.fileExists(atPath: testURL.url.path) {
+                try! fileManager.removeItem(at: testURL.url)
             }
         }
     }
