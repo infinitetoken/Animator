@@ -45,6 +45,9 @@ final class AnimatorTests: XCTestCase {
             return image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
         }.compactMap({ $0 })
     }
+    var backgroundColor: CGColor {
+        return CGColor.black
+    }
     #endif
 
     #if os(iOS) || os(tvOS)
@@ -57,7 +60,12 @@ final class AnimatorTests: XCTestCase {
             return image.cgImage
         }.compactMap({ $0 })
     }
+    var backgroundColor: CGColor {
+        return UIColor.black.cgColor
+    }
     #endif
+    
+    
     
     // MARK: - Setup / Teardown
     
@@ -82,7 +90,7 @@ final class AnimatorTests: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Create Movie")
 
-        Animator.movie(from: Animator.frames(from: self.images, duration: 1), outputURL: url) { (error) in
+        Animator.movie(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }
@@ -100,7 +108,7 @@ final class AnimatorTests: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Create Animation")
 
-        Animator.animation(from: Animator.frames(from: self.images, duration: 1), outputURL: url) { (error) in
+        Animator.animation(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor), outputURL: url) { (error) in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }

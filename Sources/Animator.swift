@@ -34,7 +34,6 @@ public struct Animator {
     public struct Frame {
         var image: CGImage
         var duration: Double
-        var position: Int = 0
         var background: CGColor
     }
     
@@ -74,9 +73,7 @@ public struct Animator {
         
         assetWriterInput.requestMediaDataWhenReady(on: queue) {
             while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
-                let frame = frames.sorted(by: { (a, b) -> Bool in
-                    a.position < b.position
-                })[frameIndex]
+                let frame = frames[frameIndex]
                 
                 if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
                     adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1))
@@ -120,9 +117,7 @@ public struct Animator {
             
             CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
             
-            for frame in frames.sorted(by: { (a, b) -> Bool in
-                a.position < b.position
-            }) {
+            for frame in frames {
                 let frameProperties = [
                     kCGImagePropertyGIFDictionary as String:[
                         kCGImagePropertyGIFDelayTime as String: frame.duration
@@ -139,6 +134,16 @@ public struct Animator {
             } else {
                 DispatchQueue.main.async { completion(AnimatorError.failed) }
             }
+        }
+    }
+    
+}
+
+public extension Animator {
+    
+    static func frames(from images: [CGImage], duration: Double, background: CGColor) -> [Frame] {
+        return images.map { (image) -> Frame in
+            return Frame(image: image, duration: duration, background: background)
         }
     }
     
