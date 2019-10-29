@@ -40,6 +40,17 @@ public struct Animator {
     public static func movie(from frames: [Frame], outputURL: URL, size: CGSize? = nil, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
         var assetWriter: AVAssetWriter
         
+        let fileManager = FileManager.default
+        
+        if fileManager.fileExists(atPath: outputURL.path) {
+            do {
+                try fileManager.removeItem(at: outputURL)
+            } catch {
+                completion(AnimatorError.error(error))
+                return
+            }
+        }
+        
         do {
             assetWriter = try AVAssetWriter(outputURL: outputURL, fileType: AVFileType.mov)
         } catch {
