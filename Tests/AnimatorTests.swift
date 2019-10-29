@@ -14,29 +14,23 @@ final class AnimatorTests: XCTestCase {
     struct TestImage {
         var size: CGSize
         var ext: String
-        var position: Int
-    }
-    
-    struct TestURL {
-        var url: URL
-        var position: Int
     }
     
     var testImages: [TestImage] {
         return [
-            TestImage(size: CGSize(width: 100, height: 100), ext: "png", position: 0),
-            TestImage(size: CGSize(width: 200, height: 100), ext: "png", position: 1),
-            TestImage(size: CGSize(width: 400, height: 200), ext: "png", position: 2)
+            TestImage(size: CGSize(width: 100, height: 100), ext: "png"),
+            TestImage(size: CGSize(width: 200, height: 100), ext: "png"),
+            TestImage(size: CGSize(width: 400, height: 200), ext: "png")
         ]
     }
-    var urls: [TestURL] = []
+    var urls: [URL] = []
     
     // MARK: - Properties
 
     #if os(macOS)
     var images: [CGImage] {
-        self.urls.map { (testURL) -> Data? in
-            try? Data(contentsOf: testURL.url)
+        self.urls.map { (url) -> Data? in
+            try? Data(contentsOf: url)
         }.compactMap({ $0 }).map { (data) -> NSImage? in
             NSImage(data: data)
         }.compactMap({ $0 }).map { (image) -> CGImage? in
@@ -135,7 +129,7 @@ final class AnimatorTests: XCTestCase {
                 
                 try? data?.write(to: fileURL)
                 
-                self.urls.append(TestURL(url: fileURL, position: testImage.position))
+                self.urls.append(fileURL)
                 
                 if index == self.testImages.count {
                     expectation.fulfill()
@@ -149,9 +143,9 @@ final class AnimatorTests: XCTestCase {
     private func removeImages() {
         let fileManager = FileManager.default
         
-        for testURL in self.urls {
-            if fileManager.fileExists(atPath: testURL.url.path) {
-                try! fileManager.removeItem(at: testURL.url)
+        for url in self.urls {
+            if fileManager.fileExists(atPath: url.path) {
+                try! fileManager.removeItem(at: url)
             }
         }
     }
