@@ -17,7 +17,7 @@ extension CGImage {
             size: size,
             pixelFormatType: kCVPixelFormatType_32ARGB,
             colorSpace: CGColorSpaceCreateDeviceRGB(),
-            alphaInfo: .noneSkipFirst
+            alphaInfo: .premultipliedFirst
         )
     }
     

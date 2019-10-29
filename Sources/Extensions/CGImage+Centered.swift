@@ -28,7 +28,7 @@ extension CGImage {
             bitsPerComponent: 8,
             bytesPerRow: bitmapBytesPerRow,
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
         )
 
         context?.setFillColor(background)
