@@ -66,6 +66,11 @@ public struct Animator {
         }?.image.height ?? 0
         let size = size ?? CGSize(width: width, height: height)
         
+        guard size.width > 0, size.height > 0 else {
+            completion(AnimatorError.failed)
+            return
+        }
+        
         let settings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecH264,
             AVVideoWidthKey: size.width,
@@ -114,6 +119,11 @@ public struct Animator {
             return a.image.height < b.image.height
         }?.image.height ?? 0
         let size = size ?? CGSize(width: width, height: height)
+        
+        guard size.width > 0, size.height > 0 else {
+            completion(AnimatorError.failed)
+            return
+        }
         
         queue.async {
             let fileProperties = [kCGImagePropertyGIFDictionary as String:[
