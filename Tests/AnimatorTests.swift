@@ -11,18 +11,13 @@ import XCTest
 
 final class AnimatorTests: XCTestCase {
     
-    struct TestImage {
-        var size: CGSize
-        var ext: String
-    }
+    var webURLs: [URL] = [
+        URL(string: "https://via.placeholder.com/100x100.png?text=1")!,
+        URL(string: "https://via.placeholder.com/100x100.png?text=2")!,
+        URL(string: "https://via.placeholder.com/100x100.png?text=3")!,
+        URL(string: "https://via.placeholder.com/100x100.png?text=4")!
+    ]
     
-    var testImages: [TestImage] {
-        return [
-            TestImage(size: CGSize(width: 100, height: 100), ext: "png"),
-            TestImage(size: CGSize(width: 200, height: 100), ext: "png"),
-            TestImage(size: CGSize(width: 400, height: 200), ext: "png")
-        ]
-    }
     var urls: [URL] = []
     
     // MARK: - Properties
@@ -117,19 +112,18 @@ final class AnimatorTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Generate Images")
         let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         
-        for index in 1...self.testImages.count {
-            let testImage = self.testImages[index - 1]
-            let url = URL(string: "https://via.placeholder.com/\(Int(testImage.size.width))x\(Int(testImage.size.height)).\(testImage.ext)?text=\(index)")!
-            
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
+        webURLs.enumerated().forEach { (url) in
+            URLSession.shared.dataTask(with: url.element) { (data, response, error) in
                 let uuid = UUID()
-                let fileURL = cacheURL.appendingPathComponent(uuid.uuidString).appendingPathExtension("png")
+                let ext = url.element.pathExtension
+                
+                let fileURL = cacheURL.appendingPathComponent(uuid.uuidString).appendingPathExtension(ext)
                 
                 try? data?.write(to: fileURL)
                 
                 self.urls.append(fileURL)
                 
-                if index == self.testImages.count {
+                if url.offset == self.webURLs.count - 1 {
                     expectation.fulfill()
                 }
             }.resume()

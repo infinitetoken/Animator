@@ -71,10 +71,9 @@ public struct Animator {
                     ]
                 ]
                 
-                let image = frame.image
-//                .centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
+                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
                     CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
-//                }
+                }
             }
             
             if CGImageDestinationFinalize(destination) {
