@@ -59,8 +59,6 @@ final class AnimatorTests: XCTestCase {
     }
     #endif
     
-    
-    
     // MARK: - Setup / Teardown
     
     override func setUp() {

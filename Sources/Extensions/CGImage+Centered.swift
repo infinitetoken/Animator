@@ -25,10 +25,10 @@ extension CGImage {
             data: pixelData,
             width: width,
             height: height,
-            bitsPerComponent: 8,
+            bitsPerComponent: self.bitsPerComponent,
             bytesPerRow: bitmapBytesPerRow,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+            space: self.colorSpace ?? CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: self.bitmapInfo.rawValue
         )
 
         context?.setFillColor(background)
