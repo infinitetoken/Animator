@@ -12,8 +12,8 @@ import XCTest
 final class AnimatorTests: XCTestCase {
     
     var webURLs: [URL] = [
-        URL(string: "https://via.placeholder.com/100x100.png?text=1")!,
-        URL(string: "https://via.placeholder.com/200x100.png?text=2")!,
+        URL(string: "https://via.placeholder.com/100x100.jpg?text=1")!,
+        URL(string: "https://via.placeholder.com/200x100.gif?text=2")!,
         URL(string: "https://via.placeholder.com/400x200.png?text=3")!
     ]
     
@@ -111,6 +111,8 @@ final class AnimatorTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Generate Images")
         let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         
+        var count = 0
+        
         webURLs.enumerated().forEach { (url) in
             URLSession.shared.dataTask(with: url.element) { (data, response, error) in
                 let uuid = UUID()
@@ -122,7 +124,9 @@ final class AnimatorTests: XCTestCase {
                 
                 self.urls.append(fileURL)
                 
-                if url.offset == self.webURLs.count - 1 {
+                count += 1
+                
+                if count == self.webURLs.count {
                     expectation.fulfill()
                 }
             }.resume()

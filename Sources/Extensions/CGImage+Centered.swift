@@ -15,12 +15,12 @@ extension CGImage {
     func centered(in rect: CGRect, background: CGColor) -> CGImage? {
         let width = rect.size.width.integerValue
         let height = rect.size.height.integerValue
-
+        
         let context = CGContext(
             data: nil,
             width: width,
             height: height,
-            bitsPerComponent: 8,
+            bitsPerComponent: self.bitsPerComponent,
             bytesPerRow: width * 4,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
