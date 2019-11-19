@@ -6,7 +6,7 @@
 //  Copyright © 2019 Infinite Token LLC. All rights reserved.
 //
 
-import Cocoa
+import Foundation
 import CoreImage
 import CoreGraphics
 
