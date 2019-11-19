@@ -14,9 +14,7 @@ public extension Animator {
     
     static func frames(from images: [NSImage], duration: Double = 1.0, background: NSColor = NSColor.black) -> [Frame] {
         return images.map({ (image) -> CGImage? in
-            var imageRect = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-            
-            return image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
+            return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
         }).compactMap({ $0 }).map { (image) -> Frame in
             return Frame(image: image, duration: duration, background: background.cgColor)
         }
@@ -27,9 +25,7 @@ public extension Animator {
 public extension Animator.Frame {
     
     init?(image: NSImage, duration: Double, background: NSColor = NSColor.black) {
-        var imageRect = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-        
-        guard let cgImage = image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil) else {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             return nil
         }
         

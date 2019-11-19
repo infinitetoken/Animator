@@ -140,9 +140,10 @@ public struct Animator {
                 
                 if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
                     adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1000))
-                    
+
                     frameTime += frame.duration
                 }
+                
                 frameIndex += 1
             }
             

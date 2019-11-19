@@ -13,9 +13,8 @@ final class AnimatorTests: XCTestCase {
     
     var webURLs: [URL] = [
         URL(string: "https://via.placeholder.com/100x100.png?text=1")!,
-        URL(string: "https://via.placeholder.com/100x100.png?text=2")!,
-        URL(string: "https://via.placeholder.com/100x100.png?text=3")!,
-        URL(string: "https://via.placeholder.com/100x100.png?text=4")!
+        URL(string: "https://via.placeholder.com/200x100.png?text=2")!,
+        URL(string: "https://via.placeholder.com/400x200.png?text=3")!
     ]
     
     var urls: [URL] = []
@@ -41,8 +40,8 @@ final class AnimatorTests: XCTestCase {
 
     #if os(iOS) || os(tvOS)
     var images: [CGImage] {
-        self.urls.map { (testURL) -> Data? in
-            try? Data(contentsOf: testURL.url)
+        self.urls.map { (url) -> Data? in
+            try? Data(contentsOf: url)
         }.compactMap({ $0 }).map { (data) -> UIImage? in
             UIImage(data: data)
         }.compactMap({ $0 }).map { (image) -> CGImage? in
