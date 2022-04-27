@@ -80,7 +80,7 @@ public struct Animator {
     public static func movie(from frames: [Frame], size: CGSize? = nil) async -> Data? {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mov")
         
-        guard let assetWriter: AVAssetWriter = try? AVAssetWriter(url: url, fileType: AVFileType.mov) else { return nil }
+        guard let assetWriter: AVAssetWriter = try? AVAssetWriter(url: url, fileType: AVFileType.mp4) else { return nil }
         
         let width = frames.max { (a, b) -> Bool in
             return a.image.width < b.image.width
