@@ -18,6 +18,8 @@ import MobileCoreServices
 
 public struct Animator {
     
+    // MARK: - Enums
+    
     public enum AnimatorError: LocalizedError {
         case failed
         case error(Error)
@@ -32,11 +34,35 @@ public struct Animator {
         }
     }
     
+    public enum MovieType: String {
+        case mov = "mov"
+        case mp4 = "mp4"
+        
+        var fileExtension: String { self.rawValue }
+        
+        var fileType: AVFileType {
+            switch self {
+            case .mov:
+                return AVFileType.mov
+            case .mp4:
+                return AVFileType.mp4
+            }
+        }
+    }
+    
+    // MARK: - Structs
+    
     public struct Frame {
         var image: CGImage
         var duration: Double
         var background: CGColor
     }
+    
+}
+
+// MARK: - Static Methods
+
+extension Animator {
     
     public static func animation(from frames: [Frame], size: CGSize? = nil) async -> Data? {
         let width = frames.max { (a, b) -> Bool in
@@ -77,10 +103,10 @@ public struct Animator {
         return data as Data
     }
     
-    public static func movie(from frames: [Frame], size: CGSize? = nil) async -> Data? {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mov")
+    public static func movie(from frames: [Frame], size: CGSize? = nil, movieType: MovieType = .mov) async -> Data? {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).\(movieType.fileExtension)")
         
-        guard let assetWriter: AVAssetWriter = try? AVAssetWriter(url: url, fileType: AVFileType.mp4) else { return nil }
+        guard let assetWriter: AVAssetWriter = try? AVAssetWriter(url: url, fileType: movieType.fileType) else { return nil }
         
         let width = frames.max { (a, b) -> Bool in
             return a.image.width < b.image.width
@@ -127,10 +153,6 @@ public struct Animator {
         
         return try? Data(contentsOf: url)
     }
-    
-}
-
-public extension Animator {
     
     static func frames(from images: [CGImage], duration: Double, background: CGColor) -> [Frame] {
         return images.map { (image) -> Frame in
