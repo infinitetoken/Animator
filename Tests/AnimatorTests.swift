@@ -69,40 +69,16 @@ final class AnimatorTests: XCTestCase {
     
     // MARK: - Tests
     
-    func testCanCreateMovie() {
-        let uuid = UUID()
-        let fileManager = FileManager.default
-        let url = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!.appendingPathComponent("\(uuid.uuidString).mov")
-
-        let expectation = XCTestExpectation(description: "Create Movie")
-
-        Animator.movie(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor), outputURL: url) { (error) in
-            if let error = error {
-                XCTFail(error.localizedDescription)
-            }
-            XCTAssertTrue(fileManager.fileExists(atPath: url.path))
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 5.0)
+    func testCanCreateMovie() async {
+        let data = await Animator.movie(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor))
+        
+        XCTAssertNotNil(data)
     }
     
-    func testCanCreateAnimation() {
-        let uuid = UUID()
-        let fileManager = FileManager.default
-        let url = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!.appendingPathComponent("\(uuid.uuidString).gif")
-
-        let expectation = XCTestExpectation(description: "Create Animation")
-
-        Animator.animation(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor), outputURL: url) { (error) in
-            if let error = error {
-                XCTFail(error.localizedDescription)
-            }
-            XCTAssertTrue(fileManager.fileExists(atPath: url.path))
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 5.0)
+    func testCanCreateAnimation() async {
+        let data = await Animator.animation(from: Animator.frames(from: self.images, duration: 1, background: self.backgroundColor))
+        
+        XCTAssertNotNil(data)
     }
     
     // MARK: - Helpers

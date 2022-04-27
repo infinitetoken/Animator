@@ -10,6 +10,7 @@ import Foundation
 import CoreGraphics
 import CoreVideo
 import AVFoundation
+import UniformTypeIdentifiers
 
 #if os(iOS) || os(tvOS)
 import MobileCoreServices
@@ -37,7 +38,7 @@ public struct Animator {
         var background: CGColor
     }
     
-    public static func animation(from frames: [Frame], outputURL: URL, size: CGSize? = nil, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
+    public static func animation(from frames: [Frame], size: CGSize? = nil) async -> Data? {
         let width = frames.max { (a, b) -> Bool in
             return a.image.width < b.image.width
         }?.image.width ?? 0
@@ -46,64 +47,40 @@ public struct Animator {
         }?.image.height ?? 0
         let size = size ?? CGSize(width: width, height: height)
         
-        guard size.width > 0, size.height > 0 else {
-            completion(AnimatorError.failed)
-            return
+        guard size.width > 0, size.height > 0 else { return nil }
+        
+        let fileProperties = [kCGImagePropertyGIFDictionary as String:[
+            kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],
+            kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
+        ] as [String : Any]
+        
+        let data = NSMutableData()
+        
+        guard let destination = CGImageDestinationCreateWithData(data, kUTTypeGIF, frames.count, nil) else { return nil }
+        
+        CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
+        
+        for frame in frames {
+            let frameProperties = [
+                kCGImagePropertyGIFDictionary as String:[
+                    kCGImagePropertyGIFDelayTime as String: frame.duration
+                ]
+            ]
+            
+            if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
+                CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
+            }
         }
         
-        queue.async {
-            let fileProperties = [kCGImagePropertyGIFDictionary as String:[
-                kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],
-                kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
-            ] as [String : Any]
-            
-            guard let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, kUTTypeGIF, frames.count, nil) else {
-                DispatchQueue.main.async { completion(AnimatorError.failed) }
-                return
-            }
-            
-            CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
-            
-            for frame in frames {
-                let frameProperties = [
-                    kCGImagePropertyGIFDictionary as String:[
-                        kCGImagePropertyGIFDelayTime as String: frame.duration
-                    ]
-                ]
-                
-                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
-                    CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
-                }
-            }
-            
-            if CGImageDestinationFinalize(destination) {
-                DispatchQueue.main.async { completion(nil) }
-            } else {
-                DispatchQueue.main.async { completion(AnimatorError.failed) }
-            }
-        }
+        CGImageDestinationFinalize(destination)
+        
+        return data as Data
     }
     
-    public static func movie(from frames: [Frame], outputURL: URL, size: CGSize? = nil, queue: DispatchQueue = DispatchQueue(label: "Animator"), completion: @escaping (Error?) -> Void) {
-        var assetWriter: AVAssetWriter
+    public static func movie(from frames: [Frame], size: CGSize? = nil) async -> Data? {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mov")
         
-        let fileManager = FileManager.default
-        
-        if fileManager.fileExists(atPath: outputURL.path) {
-            do {
-                try fileManager.removeItem(at: outputURL)
-            } catch {
-                completion(AnimatorError.error(error))
-                return
-            }
-        }
-        
-        do {
-            assetWriter = try AVAssetWriter(outputURL: outputURL, fileType: AVFileType.mov)
-        } catch {
-            completion(AnimatorError.error(error))
-            return
-        }
+        guard let assetWriter: AVAssetWriter = try? AVAssetWriter(url: url, fileType: AVFileType.mov) else { return nil }
         
         let width = frames.max { (a, b) -> Bool in
             return a.image.width < b.image.width
@@ -113,13 +90,10 @@ public struct Animator {
         }?.image.height ?? 0
         let size = size ?? CGSize(width: width, height: height)
         
-        guard size.width > 0, size.height > 0 else {
-            completion(AnimatorError.failed)
-            return
-        }
+        guard size.width > 0, size.height > 0 else { return nil }
         
         let settings: [String: Any] = [
-            AVVideoCodecKey: AVVideoCodecH264,
+            AVVideoCodecKey: AVVideoCodecType.h264,
             AVVideoWidthKey: size.width,
             AVVideoHeightKey: size.height
         ]
@@ -134,7 +108,7 @@ public struct Animator {
         var frameIndex: Int = 0
         var frameTime: Double = 0.0
         
-        assetWriterInput.requestMediaDataWhenReady(on: queue) {
+        assetWriterInput.requestMediaDataWhenReady(on: DispatchQueue(label: "Animator")) {
             while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
                 let frame = frames[frameIndex]
                 
@@ -148,15 +122,10 @@ public struct Animator {
             }
             
             assetWriterInput.markAsFinished()
-            
-            assetWriter.finishWriting {
-                if let error = assetWriter.error {
-                    DispatchQueue.main.async { completion(AnimatorError.error(error)) }
-                } else {
-                    DispatchQueue.main.async { completion(nil) }
-                }
-            }
+            assetWriter.finishWriting {}
         }
+        
+        return try? Data(contentsOf: url)
     }
     
 }
