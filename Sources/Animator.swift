@@ -154,7 +154,7 @@ extension Animator {
         return try? Data(contentsOf: url)
     }
     
-    static func frames(from images: [CGImage], duration: Double, background: CGColor) -> [Frame] {
+    public static func frames(from images: [CGImage], duration: Double, background: CGColor) -> [Frame] {
         return images.map { (image) -> Frame in
             return Frame(image: image, duration: duration, background: background)
         }
