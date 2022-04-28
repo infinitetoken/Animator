@@ -70,9 +70,13 @@ final class AnimatorTests: XCTestCase {
     // MARK: - Tests
     
     func testCanCreateAnimation() async {
-        let data = await Animator.animation(from: Animator.frames(from: self.images, duration: 1))
+        let data1 = await Animator.animation(from: Animator.frames(from: self.images, duration: 1), type: .gif)
         
-        XCTAssertNotNil(data)
+        XCTAssertNotNil(data1)
+        
+        let data2 = await Animator.animation(from: Animator.frames(from: self.images, duration: 1), type: .apng)
+        
+        XCTAssertNotNil(data2)
     }
     
     // MARK: - Helpers
