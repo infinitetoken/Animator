@@ -88,9 +88,11 @@ extension Animator {
         
         for frame in frames {
             let frameProperties = [
-                kCGImagePropertyGIFDictionary as String:[
-                    kCGImagePropertyGIFDelayTime as String: frame.duration
-                ]
+                
+//                kCGImagePropertyGIFDictionary as String : [
+//                    kCGImagePropertyGIFDelayTime as String: frame.duration
+//                ]
+                kCGImagePropertyAPNGDelayTime as String : frame.duration
             ]
             
             if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background) {
