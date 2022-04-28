@@ -124,7 +124,10 @@ extension Animator {
             AVVideoHeightKey: size.height
         ]
         let assetWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: settings)
-        let attributes: [String: Any] = [kCVPixelBufferCGImageCompatibilityKey as String: true, kCVPixelBufferCGBitmapContextCompatibilityKey as String: true]
+        let attributes: [String: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
+        ]
         let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: assetWriterInput, sourcePixelBufferAttributes: attributes)
         
         assetWriter.add(assetWriterInput)
@@ -137,7 +140,7 @@ extension Animator {
         while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
             let frame = frames[frameIndex]
             
-            if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
+            if let image = frame.image\, let buffer = image.pixelBuffer(size: size) {
                 adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1000))
 
                 frameTime += frame.duration
