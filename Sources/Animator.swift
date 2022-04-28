@@ -76,13 +76,13 @@ extension Animator {
         guard size.width > 0, size.height > 0 else { return nil }
         
         let fileProperties = [kCGImagePropertyGIFDictionary as String:[
-            kCGImagePropertyGIFLoopCount as String: NSNumber(value: Int32(0) as Int32)],
-            kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
+            kCGImagePropertyAPNGLoopCount as String: NSNumber(value: Int32(0) as Int32)]
+            //kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
         ] as [String : Any]
         
         let data = NSMutableData()
         
-        guard let destination = CGImageDestinationCreateWithData(data, kUTTypeGIF, frames.count, nil) else { return nil }
+        guard let destination = CGImageDestinationCreateWithData(data, kUTTypePNG, frames.count, nil) else { return nil }
         
         CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
         
