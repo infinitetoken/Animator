@@ -25,7 +25,9 @@ extension CGImage {
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         )
-
+        
+        context?.setShouldAntialias(false)
+        context?.interpolationQuality = .none
         context?.setFillColor(background)
         context?.fill(rect)
         context?.draw(self, in: CGRect(x: 0, y: 0, width: self.width, height: self.height).centered(in: rect))
