@@ -29,7 +29,6 @@ public struct Animator {
     public struct Frame {
         var image: CGImage
         var duration: Double
-        var background: CGColor
     }
     
 }
@@ -96,9 +95,9 @@ extension Animator {
         return data as Data
     }
     
-    public static func frames(from images: [CGImage], duration: Double, background: CGColor) -> [Frame] {
+    public static func frames(from images: [CGImage], duration: Double) -> [Frame] {
         return images.map { (image) -> Frame in
-            return Frame(image: image, duration: duration, background: background)
+            return Frame(image: image, duration: duration)
         }
     }
     

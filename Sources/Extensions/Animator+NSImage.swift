@@ -12,11 +12,11 @@ import Cocoa
 
 public extension Animator {
     
-    static func frames(from images: [NSImage], duration: Double = 1.0, background: NSColor = NSColor.black) -> [Frame] {
+    static func frames(from images: [NSImage], duration: Double = 1.0) -> [Frame] {
         return images.map({ (image) -> CGImage? in
             return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
         }).compactMap({ $0 }).map { (image) -> Frame in
-            return Frame(image: image, duration: duration, background: background.cgColor)
+            return Frame(image: image, duration: duration)
         }
     }
     
@@ -24,14 +24,13 @@ public extension Animator {
 
 public extension Animator.Frame {
     
-    init?(image: NSImage, duration: Double, background: NSColor = NSColor.black) {
+    init?(image: NSImage, duration: Double) {
         guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             return nil
         }
         
         self.image = cgImage
         self.duration = duration
-        self.background = background.cgColor
     }
     
 }
