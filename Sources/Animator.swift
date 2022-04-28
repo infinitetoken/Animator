@@ -121,7 +121,7 @@ extension Animator {
         let settings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.h264,
             AVVideoWidthKey: size.width,
-            AVVideoHeightKey: size.height
+            AVVideoHeightKey: size.height,
         ]
         let assetWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: settings)
         let attributes: [String: Any] = [

@@ -58,7 +58,9 @@ extension CGImage {
         ) else {
             return nil
         }
-
+        context.setShouldAntialias(false)
+        context.interpolationQuality = .none
+        
         context.draw(self, in: CGRect(x: 0, y: 0, width: self.width, height: self.height))
         
         return pixelBuffer
