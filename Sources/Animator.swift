@@ -134,22 +134,21 @@ extension Animator {
         var frameIndex: Int = 0
         var frameTime: Double = 0.0
         
-        assetWriterInput.requestMediaDataWhenReady(on: DispatchQueue(label: "Animator")) {
-            while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
-                let frame = frames[frameIndex]
-                
-                if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
-                    adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1000))
+        while assetWriterInput.isReadyForMoreMediaData && frameIndex < frames.count {
+            let frame = frames[frameIndex]
+            
+            if let image = frame.image.centered(in: CGRect(x: 0, y: 0, width: size.width, height: size.height), background: frame.background), let buffer = image.pixelBuffer(size: size) {
+                adaptor.append(buffer, withPresentationTime: CMTime(seconds: frameTime, preferredTimescale: 1000))
 
-                    frameTime += frame.duration
-                }
-                
-                frameIndex += 1
+                frameTime += frame.duration
             }
             
-            assetWriterInput.markAsFinished()
-            assetWriter.finishWriting {}
+            frameIndex += 1
         }
+        
+        assetWriterInput.markAsFinished()
+        
+        await assetWriter.finishWriting()
         
         return try? Data(contentsOf: url)
     }
