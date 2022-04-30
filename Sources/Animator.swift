@@ -77,11 +77,11 @@ extension Animator {
             switch type {
             case .apng:
                 frameProperties = [
-                    kCGImagePropertyAPNGDelayTime as String : frame.duration
+                    kCGImagePropertyAPNGUnclampedDelayTime as String : frame.duration
                 ]
             case .gif:
                 frameProperties = [
-                    kCGImagePropertyGIFDelayTime as String : frame.duration
+                    kCGImagePropertyGIFUnclampedDelayTime as String : frame.duration
                 ]
             }
             
