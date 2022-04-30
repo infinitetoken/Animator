@@ -55,7 +55,7 @@ extension Animator {
         case .apng:
             fileProperties = [
                 kCGImagePropertyPNGDictionary as String : [
-                    kCGImagePropertyAPNGLoopCount as String : NSNumber(value: Int32(0) as Int32),
+                    kCGImagePropertyAPNGLoopCount as String : 0,
                     kCGImagePropertyAPNGCanvasPixelWidth as String : size.width,
                     kCGImagePropertyAPNGCanvasPixelHeight as String : size.height
                 ]
@@ -65,7 +65,7 @@ extension Animator {
             fileProperties = [
                 kCGImagePropertyGIFDictionary as String : [
                     kCGImagePropertyGIFLoopCount as String : 0,
-                    kCGImagePropertyGIFHasGlobalColorMap as String : NSValue(nonretainedObject: true),
+                    kCGImagePropertyGIFHasGlobalColorMap as String : false,
                     kCGImagePropertyGIFCanvasPixelWidth as String : size.width,
                     kCGImagePropertyGIFCanvasPixelHeight as String : size.height
                 ]
