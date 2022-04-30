@@ -54,13 +54,21 @@ extension Animator {
         switch type {
         case .apng:
             fileProperties = [
-                kCGImagePropertyAPNGLoopCount as String : NSNumber(value: Int32(0) as Int32)
+                kCGImagePropertyPNGDictionary as String : [
+                    kCGImagePropertyAPNGLoopCount as String : NSNumber(value: Int32(0) as Int32),
+                    kCGImagePropertyAPNGCanvasPixelWidth as String : size.width,
+                    kCGImagePropertyAPNGCanvasPixelHeight as String : size.height
+                ]
             ]
             fileType = kUTTypePNG
         case .gif:
             fileProperties = [
-                kCGImagePropertyGIFLoopCount as String : NSNumber(value: Int32(0) as Int32),
-                kCGImagePropertyGIFHasGlobalColorMap as String: NSValue(nonretainedObject: true)
+                kCGImagePropertyGIFDictionary as String : [
+                    kCGImagePropertyGIFLoopCount as String : 0,
+                    kCGImagePropertyGIFHasGlobalColorMap as String : NSValue(nonretainedObject: true),
+                    kCGImagePropertyGIFCanvasPixelWidth as String : size.width,
+                    kCGImagePropertyGIFCanvasPixelHeight as String : size.height
+                ]
             ]
             fileType = kUTTypeGIF
         }
@@ -77,11 +85,15 @@ extension Animator {
             switch type {
             case .apng:
                 frameProperties = [
-                    kCGImagePropertyAPNGUnclampedDelayTime as String : frame.duration
+                    kCGImagePropertyPNGDictionary as String : [
+                        kCGImagePropertyAPNGUnclampedDelayTime as String : frame.duration
+                    ]
                 ]
             case .gif:
                 frameProperties = [
-                    kCGImagePropertyGIFUnclampedDelayTime as String : frame.duration
+                    kCGImagePropertyGIFDictionary as String : [
+                        kCGImagePropertyGIFUnclampedDelayTime as String : frame.duration
+                    ]
                 ]
             }
             
