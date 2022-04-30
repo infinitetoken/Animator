@@ -67,8 +67,6 @@ extension Animator {
         
         let data = NSMutableData()
         
-        fileType = kUTTypePNG
-        
         guard let destination = CGImageDestinationCreateWithData(data, fileType, frames.count, nil) else { return nil }
         
         CGImageDestinationSetProperties(destination, fileProperties as CFDictionary)
